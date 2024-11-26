@@ -1,0 +1,17 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "allow-user-to-user-db"
+  namespace: sock-shop
+spec:
+  endpointSelector:
+    matchLabels:
+      name: user-db
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        name: user
+    toPorts:
+    - ports:
+      - port: "27017"
+        protocol: TCP
