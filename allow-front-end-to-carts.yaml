@@ -1,0 +1,17 @@
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: "allow-front-end-to-carts"
+  namespace: sock-shop
+spec:
+  endpointSelector:
+    matchLabels:
+      name: carts
+  ingress:
+  - fromEndpoints:
+    - matchLabels:
+        name: front-end
+    toPorts:
+    - ports:
+      - port: "80"
+        protocol: TCP
